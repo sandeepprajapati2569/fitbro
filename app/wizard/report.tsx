@@ -33,8 +33,13 @@ export default function ReportScreen() {
 
   const [affiliates, setAffiliates] = useState<AffiliateLink[]>([]);
 
+  const hasAllData = !!(goal && currentWeight && targetWeight && timelineWeeks && gender && age && heightCm && activityLevel);
+
   const fetchPlan = useCallback(async () => {
-    if (!goal || !currentWeight || !targetWeight || !timelineWeeks || !gender || !age || !heightCm || !activityLevel) return;
+    if (!goal || !currentWeight || !targetWeight || !timelineWeeks || !gender || !age || !heightCm || !activityLevel) {
+      setError('Missing profile data. Please go back and fill in all fields.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -58,6 +63,8 @@ export default function ReportScreen() {
       const msg = err.message || '';
       if (msg.includes('429') || msg.toLowerCase().includes('quota')) {
         setError('API quota exceeded. Please wait a minute and try again.');
+      } else if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('failed to fetch')) {
+        setError('Cannot connect to server. Make sure the backend is running.');
       } else {
         setError(msg || 'Failed to generate plan. Please try again.');
       }
@@ -65,10 +72,10 @@ export default function ReportScreen() {
   }, [goal, currentWeight, targetWeight, weightUnit, timelineWeeks, gender, age, heightCm, activityLevel]);
 
   useEffect(() => {
-    if (!aiReport && !isLoading) {
+    if (!aiReport && !isLoading && !error && hasAllData) {
       fetchPlan();
     }
-  }, [aiReport, isLoading]);
+  }, [aiReport, isLoading, error, hasAllData]);
 
   useEffect(() => {
     if (aiReport) {
@@ -95,8 +102,18 @@ export default function ReportScreen() {
   if (!aiReport) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>No data available</Text>
-        <Button title="Generate Plan" onPress={() => fetchPlan()} />
+        <Feather name="clipboard" size={48} color={COLORS.textSecondary} />
+        <Text style={styles.errorTitle}>Ready to generate your plan</Text>
+        {!hasAllData && (
+          <Text style={styles.errorMessage}>
+            Please complete all wizard steps first (goal, weight, profile, timeline).
+          </Text>
+        )}
+        <Button
+          title="Generate Plan"
+          onPress={() => fetchPlan()}
+          disabled={!hasAllData}
+        />
       </View>
     );
   }
