@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Animated, Easing } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -78,19 +78,7 @@ export default function ReportScreen() {
   }, [aiReport]);
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingTitle}>Creating your personalized plan...</Text>
-        <Text style={styles.loadingSubtitle}>Calculating your BMR, TDEE & macros</Text>
-        <View style={styles.loadingSteps}>
-          <LoadingStep icon="cpu" text="Computing metabolic rate" />
-          <LoadingStep icon="target" text="Setting calorie targets" />
-          <LoadingStep icon="activity" text="Building workout plan" />
-          <LoadingStep icon="coffee" text="Designing meal plan" />
-        </View>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -198,11 +186,128 @@ export default function ReportScreen() {
   );
 }
 
-function LoadingStep({ icon, text }: { icon: keyof typeof Feather.glyphMap; text: string }) {
+const LOADING_STEPS = [
+  { icon: 'cpu' as const, text: 'Computing metabolic rate' },
+  { icon: 'target' as const, text: 'Setting calorie targets' },
+  { icon: 'bar-chart-2' as const, text: 'Calculating macro split' },
+  { icon: 'activity' as const, text: 'Building workout plan' },
+  { icon: 'coffee' as const, text: 'Designing meal plan' },
+];
+
+function LoadingScreen() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const pulseAnim = useRef(new Animated.Value(0.3)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // Pulse animation for the spinner area
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, []);
+
+  // Progress through steps
+  useEffect(() => {
+    const stepInterval = setInterval(() => {
+      setActiveStep((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+    }, 3000);
+    return () => clearInterval(stepInterval);
+  }, []);
+
+  // Progress bar animation
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: (activeStep + 1) / LOADING_STEPS.length,
+      duration: 800,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+  }, [activeStep]);
+
+  // Elapsed time counter
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
-    <View style={styles.loadingStep}>
-      <Feather name={icon} size={18} color={COLORS.primary} />
-      <Text style={styles.loadingStepText}>{text}</Text>
+    <View style={styles.loadingContainer}>
+      {/* Animated spinner circle */}
+      <Animated.View style={[styles.spinnerCircle, { opacity: pulseAnim }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </Animated.View>
+
+      <Text style={styles.loadingTitle}>Creating your personalized plan</Text>
+      <Text style={styles.loadingSubtitle}>This may take 10-15 seconds</Text>
+
+      {/* Progress bar */}
+      <View style={styles.progressBarContainer}>
+        <View style={styles.progressBarTrack}>
+          <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
+        </View>
+        <Text style={styles.progressText}>{Math.round(((activeStep + 1) / LOADING_STEPS.length) * 100)}%</Text>
+      </View>
+
+      {/* Animated steps */}
+      <View style={styles.loadingSteps}>
+        {LOADING_STEPS.map((step, index) => {
+          const isDone = index < activeStep;
+          const isActive = index === activeStep;
+          const isPending = index > activeStep;
+
+          return (
+            <View key={index} style={styles.loadingStep}>
+              <View style={[
+                styles.stepIconCircle,
+                isDone && styles.stepIconDone,
+                isActive && styles.stepIconActive,
+              ]}>
+                {isDone ? (
+                  <Feather name="check" size={14} color="#fff" />
+                ) : isActive ? (
+                  <ActivityIndicator size="small" color={COLORS.primary} />
+                ) : (
+                  <Feather name={step.icon} size={14} color={COLORS.border} />
+                )}
+              </View>
+              <Text style={[
+                styles.loadingStepText,
+                isDone && styles.stepTextDone,
+                isActive && styles.stepTextActive,
+                isPending && styles.stepTextPending,
+              ]}>
+                {step.text}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Elapsed time */}
+      <Text style={styles.elapsedText}>{elapsed}s elapsed</Text>
     </View>
   );
 }
@@ -244,19 +349,55 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.screenPadding,
   },
+  spinnerCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
+  },
   loadingTitle: {
     ...FONTS.headlineMedium,
     color: COLORS.text,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.sm,
     textAlign: 'center',
   },
   loadingSubtitle: {
     ...FONTS.caption,
     color: COLORS.textSecondary,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  progressBarTrack: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 3,
+  },
+  progressText: {
+    ...FONTS.small,
+    color: COLORS.primary,
+    fontWeight: '700',
+    width: 36,
+    textAlign: 'right',
   },
   loadingSteps: {
-    marginTop: SPACING.xl,
+    width: '100%',
     gap: SPACING.md,
   },
   loadingStep: {
@@ -264,9 +405,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
+  stepIconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepIconDone: {
+    backgroundColor: COLORS.success,
+  },
+  stepIconActive: {
+    backgroundColor: COLORS.primaryLight,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
   loadingStepText: {
     ...FONTS.body,
     color: COLORS.textSecondary,
+    flex: 1,
+  },
+  stepTextDone: {
+    color: COLORS.success,
+    textDecorationLine: 'line-through',
+  },
+  stepTextActive: {
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+  stepTextPending: {
+    color: COLORS.border,
+  },
+  elapsedText: {
+    ...FONTS.small,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.lg,
   },
 
   // Error
