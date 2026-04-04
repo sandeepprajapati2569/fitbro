@@ -38,15 +38,19 @@ async def create_plan(body: GeneratePlanRequest, request: Request):
             print(f"Supabase save failed: {e}")
 
     # 4. Build response
-    return PlanResponse(
-        id=plan_id,
-        calculated=metrics,
-        summary=plan_data.get("summary", ""),
-        dailyCalorieTarget=metrics.daily_calories,
-        workoutPlan=plan_data.get("workoutPlan", []),
-        mealPlan=plan_data.get("mealPlan", []),
-        supplementRecommendations=plan_data.get("supplementRecommendations", []),
-    )
+    try:
+        return PlanResponse(
+            id=plan_id,
+            calculated=metrics,
+            summary=plan_data.get("summary", ""),
+            dailyCalorieTarget=metrics.daily_calories,
+            workoutPlan=plan_data.get("workoutPlan", []),
+            mealPlan=plan_data.get("mealPlan", []),
+            supplementRecommendations=plan_data.get("supplementRecommendations", []),
+        )
+    except Exception as e:
+        print(f"Response validation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Plan format error: {e}")
 
 
 @router.get("/plans/{plan_id}", response_model=PlanResponse)

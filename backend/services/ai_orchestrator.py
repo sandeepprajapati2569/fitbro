@@ -171,11 +171,22 @@ async def generate_ai_plan(
             c = meal.get("carbs", 0)
             f = meal.get("fat", 0)
             calculated_cal = p * 4 + c * 4 + f * 9
-            # Use the macro-calculated value for accuracy
             meal["calories"] = calculated_cal
 
         # Update day total
         total = sum(m.get("calories", 0) for m in meals)
         meal_day["totalCalories"] = total
+
+    # --- Normalize supplement recommendations to strings ---
+    supps = plan.get("supplementRecommendations", [])
+    normalized = []
+    for s in supps:
+        if isinstance(s, dict):
+            name = s.get("name", "")
+            dosage = s.get("dosage", "")
+            normalized.append(f"{name} ({dosage})" if dosage else name)
+        elif isinstance(s, str):
+            normalized.append(s)
+    plan["supplementRecommendations"] = normalized
 
     return plan
