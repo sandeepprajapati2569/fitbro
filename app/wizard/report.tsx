@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Animated, Easing } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { WorkoutPlan } from '../../components/report/WorkoutPlan';
@@ -35,8 +36,22 @@ export default function ReportScreen() {
 
   const hasAllData = !!(goal && currentWeight && targetWeight && timelineWeeks && gender && age && heightCm && activityLevel);
 
-  const fetchPlan = useCallback(async () => {
-    if (!goal || !currentWeight || !targetWeight || !timelineWeeks || !gender || !age || !heightCm || !activityLevel) {
+  const fetchPlan = async () => {
+    // Read directly from the store to avoid stale closure values
+    const state = useWizardStore.getState();
+    const {
+      goal: g,
+      currentWeight: cw,
+      targetWeight: tw,
+      weightUnit: wu,
+      timelineWeeks: tw2,
+      gender: gen,
+      age: a,
+      heightCm: h,
+      activityLevel: al,
+    } = state;
+
+    if (!g || !cw || !tw || !tw2 || !gen || !a || !h || !al) {
       setError('Missing profile data. Please go back and fill in all fields.');
       return;
     }
@@ -45,17 +60,7 @@ export default function ReportScreen() {
     setError(null);
 
     try {
-      const report = await generateFitnessPlan(
-        goal,
-        currentWeight,
-        targetWeight,
-        weightUnit,
-        timelineWeeks,
-        gender,
-        age,
-        heightCm,
-        activityLevel
-      );
+      const report = await generateFitnessPlan(g, cw, tw, wu, tw2, gen, a, h, al);
       setReport(report);
       const matched = matchAffiliates(report);
       setAffiliates(matched);
@@ -69,13 +74,17 @@ export default function ReportScreen() {
         setError(msg || 'Failed to generate plan. Please try again.');
       }
     }
-  }, [goal, currentWeight, targetWeight, weightUnit, timelineWeeks, gender, age, heightCm, activityLevel]);
+  };
 
-  useEffect(() => {
-    if (!aiReport && !isLoading && !error && hasAllData) {
-      fetchPlan();
-    }
-  }, [aiReport, isLoading, error, hasAllData]);
+  // Auto-fetch every time this screen gains focus, if no report exists
+  useFocusEffect(
+    useCallback(() => {
+      const state = useWizardStore.getState();
+      if (!state.aiReport) {
+        fetchPlan();
+      }
+    }, [])
+  );
 
   useEffect(() => {
     if (aiReport) {

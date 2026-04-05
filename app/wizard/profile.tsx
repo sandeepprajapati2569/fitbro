@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   genderTextActive: {
-    color: COLORS.primary,
+    color: '#fff',
   },
   row: {
     flexDirection: 'row',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   activityTitleActive: {
-    color: COLORS.primaryDark,
+    color: '#fff',
   },
   activityDesc: {
     fontSize: 11,
@@ -219,11 +219,12 @@ const styles = StyleSheet.create({
   },
   radioSelected: {
     borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
   },
   radioInner: {
-    width: 11,
-    height: 11,
-    borderRadius: 6,
-    backgroundColor: COLORS.primary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#000',
   },
 });

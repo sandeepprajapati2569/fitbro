@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request
+
 from models.request import GeneratePlanRequest
 from models.response import PlanResponse, PlanSummary
-from services.fitness_calculator import calculate_fitness_metrics
 from services.ai_orchestrator import generate_ai_plan
-from services.plan_store import save_plan, get_plan, list_plans
+from services.fitness_calculator import calculate_fitness_metrics
+from services.plan_store import get_plan, list_plans, save_plan
 
 router = APIRouter(prefix="/api", tags=["plans"])
 
@@ -18,9 +19,7 @@ async def create_plan(body: GeneratePlanRequest, request: Request):
 
     # 2. Generate AI plan constrained by calculated metrics
     try:
-        plan_data = await generate_ai_plan(
-            settings.OPENAI_API_KEY, body, metrics
-        )
+        plan_data = await generate_ai_plan(settings.OPENAI_API_KEY, body, metrics)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
 
@@ -77,9 +76,7 @@ async def retrieve_plan(plan_id: str, request: Request):
 
 
 @router.get("/plans", response_model=list[PlanSummary])
-async def get_plans(
-    request: Request, limit: int = 20, offset: int = 0
-):
+async def get_plans(request: Request, limit: int = 20, offset: int = 0):
     supabase = request.app.state.supabase
     if not supabase:
         return []

@@ -13,9 +13,13 @@ export async function generateFitnessPlan(
   heightCm: number,
   activityLevel: ActivityLevel
 ): Promise<AIReport> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
   const response = await fetch(`${API_BASE_URL}/api/generate-plan`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: controller.signal,
     body: JSON.stringify({
       goal,
       current_weight: currentWeight,
@@ -28,6 +32,8 @@ export async function generateFitnessPlan(
       activity_level: activityLevel,
     }),
   });
+
+  clearTimeout(timeout);
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));

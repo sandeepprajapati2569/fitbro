@@ -1,12 +1,12 @@
 import json
+
 from openai import AsyncOpenAI
+
 from models.request import GeneratePlanRequest
 from models.response import CalculatedMetrics
 
 
-def _build_constrained_prompt(
-    req: GeneratePlanRequest, metrics: CalculatedMetrics
-) -> str:
+def _build_constrained_prompt(req: GeneratePlanRequest, metrics: CalculatedMetrics) -> str:
     goal_text = "lose weight" if req.goal == "lose_weight" else "gain weight"
     delta = abs(req.current_weight - req.target_weight)
 

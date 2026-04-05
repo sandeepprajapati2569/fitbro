@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from config import get_settings
 from routes.plans import router as plans_router
 
@@ -14,9 +16,8 @@ async def lifespan(app: FastAPI):
     if settings.SUPABASE_URL and not settings.SUPABASE_URL.startswith("https://placeholder"):
         try:
             from supabase import acreate_client
-            app.state.supabase = await acreate_client(
-                settings.SUPABASE_URL, settings.SUPABASE_KEY
-            )
+
+            app.state.supabase = await acreate_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
             print("✅ Supabase connected")
         except Exception as e:
             print(f"⚠️ Supabase not available: {e}")

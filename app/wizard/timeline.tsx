@@ -23,7 +23,7 @@ function weeksToReadable(weeks: number): string {
 
 export default function TimelineScreen() {
   const router = useRouter();
-  const { currentWeight, targetWeight, setTimeline, setLoading, isLoading } = useWizardStore();
+  const { currentWeight, targetWeight, setTimeline, isLoading } = useWizardStore();
   const [weeks, setWeeks] = useState(12);
 
   const aggressive =

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+
 from supabase import AsyncClient
 
 
@@ -22,17 +23,13 @@ async def save_plan(
 
 
 async def get_plan(supabase: AsyncClient, plan_id: str) -> dict | None:
-    result = (
-        await supabase.table("plans").select("*").eq("id", plan_id).execute()
-    )
+    result = await supabase.table("plans").select("*").eq("id", plan_id).execute()
     if result.data:
         return result.data[0]
     return None
 
 
-async def list_plans(
-    supabase: AsyncClient, limit: int = 20, offset: int = 0
-) -> list[dict]:
+async def list_plans(supabase: AsyncClient, limit: int = 20, offset: int = 0) -> list[dict]:
     result = (
         await supabase.table("plans")
         .select("id, created_at, request, calculated_metrics")

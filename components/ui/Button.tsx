@@ -54,6 +54,11 @@ const styles = StyleSheet.create({
   },
   primary: {
     backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
   },
   secondary: {
     backgroundColor: COLORS.primaryLight,
@@ -68,9 +73,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   text: {
-    ...FONTS.bodyMedium,
+    fontFamily: 'Urbanist_600SemiBold',
+    fontSize: 16,
     color: '#FFFFFF',
-    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   outlineText: {
     color: COLORS.primary,
