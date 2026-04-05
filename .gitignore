@@ -33,7 +33,9 @@ yarn-error.*
 # local env files
 .env
 .env*.local
-backend/.env
+
+# Backend (has its own repo)
+backend/
 
 # IDE
 .idea/
