@@ -24,10 +24,10 @@ const MEAL_COLORS: Record<string, string> = {
   snack: '#00E676',
 };
 const MEAL_BG_COLORS: Record<string, string> = {
-  breakfast: '#2B2508',
-  lunch: '#0D1A2B',
-  dinner: '#1F0D2B',
-  snack: '#0D2B1A',
+  breakfast: '#FFF8E1',
+  lunch: '#EFF6FF',
+  dinner: '#F3E8FF',
+  snack: '#E6F7F5',
 };
 
 export function MealsTab({ mealPlan, todayIndex }: MealsTabProps) {
@@ -97,7 +97,7 @@ export function MealsTab({ mealPlan, todayIndex }: MealsTabProps) {
                 <View
                   style={[
                     styles.mealIcon,
-                    { backgroundColor: MEAL_BG_COLORS[meal.type] || '#0D2B1A' },
+                    { backgroundColor: MEAL_BG_COLORS[meal.type] || '#E6F7F5' },
                   ]}
                 >
                   <Feather name={MEAL_ICONS[meal.type] || 'coffee'} size={18} color={mealColor} />

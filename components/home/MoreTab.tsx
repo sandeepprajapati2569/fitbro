@@ -40,7 +40,7 @@ export function MoreTab({
       {/* Achievements Preview */}
       <Card glow style={styles.card}>
         <View style={styles.sectionHeader}>
-          <View style={[styles.iconCircle, { backgroundColor: '#1F0D2B' }]}>
+          <View style={[styles.iconCircle, { backgroundColor: '#F3E8FF' }]}>
             <Feather name="award" size={18} color={COLORS.badge} />
           </View>
           <Text style={styles.sectionTitle}>Achievements</Text>
@@ -80,7 +80,7 @@ export function MoreTab({
       {/* Detailed Metrics */}
       <Card style={styles.card}>
         <View style={styles.sectionHeader}>
-          <View style={[styles.iconCircle, { backgroundColor: '#0D1A2B' }]}>
+          <View style={[styles.iconCircle, { backgroundColor: '#EFF6FF' }]}>
             <Feather name="bar-chart-2" size={18} color="#60A5FA" />
           </View>
           <Text style={styles.sectionTitle}>Detailed Metrics</Text>
@@ -139,7 +139,7 @@ export function MoreTab({
       {/* AI Summary */}
       <Card style={styles.card}>
         <View style={styles.sectionHeader}>
-          <View style={[styles.iconCircle, { backgroundColor: '#2B2508' }]}>
+          <View style={[styles.iconCircle, { backgroundColor: '#FFF8E1' }]}>
             <Feather name="cpu" size={18} color={COLORS.xpGold} />
           </View>
           <Text style={styles.sectionTitle}>AI Summary</Text>
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.borderLight,
   },
   badgeIconUnlocked: {
-    backgroundColor: '#2B2508',
+    backgroundColor: '#FFF8E1',
     borderColor: COLORS.xpGold,
     shadowColor: COLORS.xpGold,
     shadowOpacity: 0.3,

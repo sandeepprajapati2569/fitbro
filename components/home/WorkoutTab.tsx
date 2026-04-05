@@ -58,14 +58,14 @@ export function WorkoutTab({ workoutPlan, todayIndex }: WorkoutTabProps) {
             <Card style={styles.statsCard}>
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                  <View style={[styles.statIcon, { backgroundColor: '#0D1A2B' }]}>
+                  <View style={[styles.statIcon, { backgroundColor: '#EFF6FF' }]}>
                     <Feather name="zap" size={16} color="#60A5FA" />
                   </View>
                   <Text style={styles.statValue}>{day.exercises.length}</Text>
                   <Text style={styles.statLabel}>Exercises</Text>
                 </View>
                 <View style={styles.statItem}>
-                  <View style={[styles.statIcon, { backgroundColor: '#2B2508' }]}>
+                  <View style={[styles.statIcon, { backgroundColor: '#FFF8E1' }]}>
                     <Feather name="clock" size={16} color={COLORS.xpGold} />
                   </View>
                   <Text style={styles.statValue}>{day.durationMinutes}</Text>
@@ -153,11 +153,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     marginTop: SPACING.md,
-    backgroundColor: '#2B2508',
+    backgroundColor: '#FFF8E1',
     borderRadius: BORDER_RADIUS.sm,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#2B2508',
+    borderColor: '#FFF8E1',
   },
   xpBannerText: { fontSize: 11, fontWeight: '600', color: COLORS.xpGold },
   exerciseCard: { padding: SPACING.md },

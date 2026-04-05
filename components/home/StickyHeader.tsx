@@ -30,13 +30,13 @@ export function StickyHeader({ dailyCalories, goalText, calc, onNewPlan }: Stick
       {/* Right: Macro badges + refresh */}
       <View style={styles.rightSection}>
         <View style={styles.macroRow}>
-          <View style={[styles.macroBadge, { backgroundColor: '#0D1A2B' }]}>
+          <View style={[styles.macroBadge, { backgroundColor: '#EFF6FF' }]}>
             <Text style={[styles.macroText, { color: COLORS.protein }]}>P {calc.protein_g}g</Text>
           </View>
-          <View style={[styles.macroBadge, { backgroundColor: '#2B2508' }]}>
+          <View style={[styles.macroBadge, { backgroundColor: '#FFF8E1' }]}>
             <Text style={[styles.macroText, { color: COLORS.carbs }]}>C {calc.carbs_g}g</Text>
           </View>
-          <View style={[styles.macroBadge, { backgroundColor: '#2B0D0D' }]}>
+          <View style={[styles.macroBadge, { backgroundColor: '#FEF2F2' }]}>
             <Text style={[styles.macroText, { color: COLORS.fat }]}>F {calc.fat_g}g</Text>
           </View>
         </View>

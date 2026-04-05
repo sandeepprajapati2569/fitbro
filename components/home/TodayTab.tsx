@@ -98,7 +98,7 @@ export function TodayTab({ report, goal, todayIndex, onViewWorkout, onViewMeals 
       <Card style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
-            <View style={[styles.iconCircle, { backgroundColor: '#0D1A2B' }]}>
+            <View style={[styles.iconCircle, { backgroundColor: '#EFF6FF' }]}>
               <Feather name="activity" size={18} color={COLORS.protein} />
             </View>
             <View>
@@ -164,7 +164,7 @@ export function TodayTab({ report, goal, todayIndex, onViewWorkout, onViewMeals 
       <Card style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
-            <View style={[styles.iconCircle, { backgroundColor: '#2B2508' }]}>
+            <View style={[styles.iconCircle, { backgroundColor: '#FFF8E1' }]}>
               <Feather name="coffee" size={18} color={COLORS.xpGold} />
             </View>
             <View>
@@ -186,11 +186,11 @@ export function TodayTab({ report, goal, todayIndex, onViewWorkout, onViewMeals 
                 {
                   backgroundColor:
                     meal.type === 'breakfast'
-                      ? '#2B2508'
+                      ? '#FFF8E1'
                       : meal.type === 'lunch'
-                        ? '#0D1A2B'
+                        ? '#EFF6FF'
                         : meal.type === 'dinner'
-                          ? '#1F0D2B'
+                          ? '#F3E8FF'
                           : COLORS.primaryLight,
                 },
               ]}
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#2B1508',
+    backgroundColor: '#FFF7ED',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#2B2508',
+    backgroundColor: '#FFF8E1',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -461,12 +461,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#2B2508',
+    backgroundColor: '#FFF8E1',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
-    borderColor: '#2B2508',
+    borderColor: '#FFF8E1',
   },
   xpRewardText: {
     fontFamily: 'Urbanist_700Bold',

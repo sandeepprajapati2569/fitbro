@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     top: 4,
     left: 4,
     bottom: 4,
-    backgroundColor: '#0D2B1A',
+    backgroundColor: COLORS.primaryLight,
     borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1.5,
     borderColor: COLORS.primary,
