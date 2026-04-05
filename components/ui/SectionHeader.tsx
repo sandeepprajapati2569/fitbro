@@ -17,12 +17,11 @@ export function SectionHeader({ title, subtitle }: SectionHeaderProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   title: {
     ...FONTS.headlineBold,
     color: COLORS.text,
-    lineHeight: 32,
   },
   subtitle: {
     ...FONTS.body,

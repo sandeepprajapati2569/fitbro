@@ -18,7 +18,7 @@ export function RadioOption({ title, description, icon, selected, onPress }: Rad
       activeOpacity={0.7}
     >
       <View style={[styles.iconContainer, selected && styles.iconSelected]}>
-        <Feather name={icon} size={28} color={selected ? '#fff' : COLORS.textSecondary} />
+        <Feather name={icon} size={28} color={selected ? COLORS.primary : COLORS.textSecondary} />
       </View>
       <View style={styles.textContainer}>
         <Text style={[styles.title, selected && styles.titleSelected]}>{title}</Text>
@@ -48,12 +48,7 @@ const styles = StyleSheet.create({
   },
   selected: {
     borderColor: COLORS.primary,
-    borderWidth: 2,
-    backgroundColor: '#0D2B1A',
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 6,
+    backgroundColor: COLORS.primaryLight,
   },
   iconContainer: {
     width: 56,
@@ -65,8 +60,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   iconSelected: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: '#FFFFFF',
   },
   textContainer: {
     flex: 1,
@@ -78,7 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   titleSelected: {
-    color: '#fff',
+    color: COLORS.primaryDark,
   },
   description: {
     ...FONTS.caption,
@@ -96,12 +90,11 @@ const styles = StyleSheet.create({
   },
   radioSelected: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary,
   },
   radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#000',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.primary,
   },
 });

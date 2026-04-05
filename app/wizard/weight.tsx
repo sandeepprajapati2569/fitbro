@@ -152,8 +152,6 @@ const styles = StyleSheet.create({
   },
   deltaContainer: {
     backgroundColor: COLORS.primaryLight,
-    borderColor: COLORS.primary,
-    borderWidth: 1,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     marginTop: SPACING.md,
@@ -161,6 +159,6 @@ const styles = StyleSheet.create({
   },
   deltaText: {
     ...FONTS.bodyMedium,
-    color: '#fff',
+    color: COLORS.primaryDark,
   },
 });

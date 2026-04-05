@@ -56,24 +56,19 @@ const styles = StyleSheet.create({
     flex: 0,
   },
   dot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
   dotActive: {
     backgroundColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 4,
   },
   dotInactive: {
     backgroundColor: COLORS.border,
   },
   line: {
     flex: 1,
-    height: 2.5,
+    height: 2,
     marginHorizontal: 4,
   },
   lineActive: {
