@@ -33,6 +33,7 @@ export default function TimelineScreen() {
 
   const handleGenerate = async () => {
     setTimeline(weeks);
+    // Don't set isLoading here — the report screen handles it via useFocusEffect
     router.push('/wizard/report');
   };
 

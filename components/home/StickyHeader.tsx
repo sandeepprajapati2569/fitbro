@@ -1,5 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
 import { Logo } from '../ui/Logo';
 import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../../lib/constants';
 import type { CalculatedMetrics } from '../../types';
@@ -8,10 +7,9 @@ interface StickyHeaderProps {
   dailyCalories: number;
   goalText: string;
   calc: CalculatedMetrics;
-  onNewPlan: () => void;
 }
 
-export function StickyHeader({ dailyCalories, goalText, calc, onNewPlan }: StickyHeaderProps) {
+export function StickyHeader({ dailyCalories, goalText, calc }: StickyHeaderProps) {
   return (
     <View style={styles.container}>
       {/* Left: Logo + goal info */}
@@ -27,7 +25,7 @@ export function StickyHeader({ dailyCalories, goalText, calc, onNewPlan }: Stick
         </View>
       </View>
 
-      {/* Right: Macro badges + refresh */}
+      {/* Right: Macro badges */}
       <View style={styles.rightSection}>
         <View style={styles.macroRow}>
           <View style={[styles.macroBadge, { backgroundColor: '#EFF6FF' }]}>
@@ -40,9 +38,6 @@ export function StickyHeader({ dailyCalories, goalText, calc, onNewPlan }: Stick
             <Text style={[styles.macroText, { color: COLORS.fat }]}>F {calc.fat_g}g</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.refreshBtn} onPress={onNewPlan} activeOpacity={0.7}>
-          <Feather name="refresh-cw" size={15} color={COLORS.primary} />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -97,15 +92,5 @@ const styles = StyleSheet.create({
   macroText: {
     fontFamily: 'Urbanist_700Bold',
     fontSize: 10,
-  },
-  refreshBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.primaryGlow,
   },
 });

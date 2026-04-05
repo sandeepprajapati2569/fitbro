@@ -1,29 +1,15 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Animated, Easing } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
-import { Card } from '../../components/ui/Card';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Button } from '../../components/ui/Button';
-import { WorkoutPlan } from '../../components/report/WorkoutPlan';
-import { MealPlan } from '../../components/report/MealPlan';
-import { AffiliateSection } from '../../components/report/AffiliateSection';
 import { useWizardStore } from '../../store/useWizardStore';
 import { generateFitnessPlan } from '../../lib/generate-plan';
-import { matchAffiliates } from '../../lib/affiliates';
 import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../../lib/constants';
-import type { AffiliateLink } from '../../types';
 
 export default function ReportScreen() {
+  const router = useRouter();
   const {
-    goal,
-    currentWeight,
-    targetWeight,
-    weightUnit,
-    timelineWeeks,
-    gender,
-    age,
-    heightCm,
-    activityLevel,
     aiReport,
     isLoading,
     error,
@@ -32,12 +18,7 @@ export default function ReportScreen() {
     setError,
   } = useWizardStore();
 
-  const [affiliates, setAffiliates] = useState<AffiliateLink[]>([]);
-
-  const hasAllData = !!(goal && currentWeight && targetWeight && timelineWeeks && gender && age && heightCm && activityLevel);
-
   const fetchPlan = async () => {
-    // Read directly from the store to avoid stale closure values
     const state = useWizardStore.getState();
     const {
       goal: g,
@@ -60,10 +41,16 @@ export default function ReportScreen() {
     setError(null);
 
     try {
-      const report = await generateFitnessPlan(g, cw, tw, wu, tw2, gen, a, h, al);
+      // Run fetch and minimum display timer in parallel
+      // 6s minimum so all 5 loading steps complete visually
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 6000));
+      const [report] = await Promise.all([
+        generateFitnessPlan(g, cw, tw, wu, tw2, gen, a, h, al),
+        minDelay,
+      ]);
       setReport(report);
-      const matched = matchAffiliates(report);
-      setAffiliates(matched);
+      // Navigate to home screen after successful generation
+      router.replace('/home');
     } catch (err: any) {
       const msg = err.message || '';
       if (msg.includes('429') || msg.toLowerCase().includes('quota')) {
@@ -76,26 +63,18 @@ export default function ReportScreen() {
     }
   };
 
-  // Auto-fetch every time this screen gains focus, if no report exists
+  // Auto-fetch when screen gains focus and no report exists
   useFocusEffect(
     useCallback(() => {
       const state = useWizardStore.getState();
-      if (!state.aiReport) {
+      if (!state.aiReport && !state.isLoading) {
         fetchPlan();
+      } else if (state.aiReport) {
+        // Already have a report, go to home
+        router.replace('/home');
       }
     }, [])
   );
-
-  useEffect(() => {
-    if (aiReport) {
-      const matched = matchAffiliates(aiReport);
-      setAffiliates(matched);
-    }
-  }, [aiReport]);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   if (error) {
     return (
@@ -108,108 +87,8 @@ export default function ReportScreen() {
     );
   }
 
-  if (!aiReport) {
-    return (
-      <View style={styles.errorContainer}>
-        <Feather name="clipboard" size={48} color={COLORS.textSecondary} />
-        <Text style={styles.errorTitle}>Ready to generate your plan</Text>
-        {!hasAllData && (
-          <Text style={styles.errorMessage}>
-            Please complete all wizard steps first (goal, weight, profile, timeline).
-          </Text>
-        )}
-        <Button
-          title="Generate Plan"
-          onPress={() => fetchPlan()}
-          disabled={!hasAllData}
-        />
-      </View>
-    );
-  }
-
-  const delta = currentWeight && targetWeight ? Math.abs(currentWeight - targetWeight) : 0;
-  const goalText = goal === 'lose_weight' ? 'lose' : 'gain';
-  const calc = aiReport.calculated;
-
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.reportContent}>
-      {/* Summary Card */}
-      <Card style={styles.summaryCard}>
-        <View style={styles.calorieCircle}>
-          <Text style={styles.calorieNumber}>{aiReport.dailyCalorieTarget}</Text>
-          <Text style={styles.calorieLabel}>cal/day</Text>
-        </View>
-        <Text style={styles.summaryTitle}>
-          Your plan to {goalText} {delta.toFixed(1)} {weightUnit} in {timelineWeeks} weeks
-        </Text>
-        <Text style={styles.summaryText}>{aiReport.summary}</Text>
-      </Card>
-
-      {/* Calculated Metrics */}
-      {calc && (
-        <Card style={styles.metricsCard}>
-          <Text style={styles.metricsTitle}>Your Body Metrics</Text>
-          <View style={styles.metricsGrid}>
-            <MetricItem label="BMR" value={`${calc.bmr}`} unit="kcal" />
-            <MetricItem label="TDEE" value={`${calc.tdee}`} unit="kcal" />
-            <MetricItem label="Daily Target" value={`${calc.daily_calories}`} unit="kcal" />
-            <MetricItem
-              label={goal === 'lose_weight' ? 'Deficit' : 'Surplus'}
-              value={`${Math.abs(calc.deficit_or_surplus)}`}
-              unit="kcal"
-            />
-          </View>
-          <View style={styles.macroRow}>
-            <MacroBadge label="Protein" value={calc.protein_g} unit="g" color="#3B82F6" />
-            <MacroBadge label="Carbs" value={calc.carbs_g} unit="g" color="#F59E0B" />
-            <MacroBadge label="Fat" value={calc.fat_g} unit="g" color="#EF4444" />
-          </View>
-          <Text style={styles.rateText}>
-            Weekly rate: {calc.weekly_weight_change_kg} kg/week
-          </Text>
-        </Card>
-      )}
-
-      {/* Workout Plan */}
-      <View style={styles.section}>
-        <WorkoutPlan workoutPlan={aiReport.workoutPlan} />
-      </View>
-
-      {/* Meal Plan */}
-      <View style={styles.section}>
-        <MealPlan mealPlan={aiReport.mealPlan} />
-      </View>
-
-      {/* Supplements */}
-      {aiReport.supplementRecommendations.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Supplement Recommendations</Text>
-          <Card>
-            {aiReport.supplementRecommendations.map((supp, i) => (
-              <View key={i} style={styles.suppRow}>
-                <Feather name="check-circle" size={16} color={COLORS.success} />
-                <Text style={styles.suppText}>{supp}</Text>
-              </View>
-            ))}
-          </Card>
-        </View>
-      )}
-
-      {/* Affiliate Products */}
-      <View style={styles.section}>
-        <AffiliateSection products={affiliates} />
-      </View>
-
-      {/* Disclaimer */}
-      <View style={styles.disclaimer}>
-        <Feather name="info" size={14} color={COLORS.textSecondary} />
-        <Text style={styles.disclaimerText}>
-          This plan is AI-generated with scientifically calculated targets (Mifflin-St Jeor BMR).
-          Consult a healthcare provider before starting any new fitness or nutrition program.
-        </Text>
-      </View>
-    </ScrollView>
-  );
+  // Always show loading screen while generating
+  return <LoadingScreen />;
 }
 
 const LOADING_STEPS = [
@@ -248,11 +127,11 @@ function LoadingScreen() {
     return () => pulse.stop();
   }, []);
 
-  // Progress through steps
+  // Progress through steps — 1s per step so all 5 complete in ~5s
   useEffect(() => {
     const stepInterval = setInterval(() => {
       setActiveStep((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 3000);
+    }, 1000);
     return () => clearInterval(stepInterval);
   }, []);
 
@@ -287,14 +166,16 @@ function LoadingScreen() {
       </Animated.View>
 
       <Text style={styles.loadingTitle}>Creating your personalized plan</Text>
-      <Text style={styles.loadingSubtitle}>This may take 10-15 seconds</Text>
+      <Text style={styles.loadingSubtitle}>This may take a few seconds</Text>
 
       {/* Progress bar */}
       <View style={styles.progressBarContainer}>
         <View style={styles.progressBarTrack}>
           <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
         </View>
-        <Text style={styles.progressText}>{Math.round(((activeStep + 1) / LOADING_STEPS.length) * 100)}%</Text>
+        <Text style={styles.progressText}>
+          {Math.round(((activeStep + 1) / LOADING_STEPS.length) * 100)}%
+        </Text>
       </View>
 
       {/* Animated steps */}
@@ -306,11 +187,13 @@ function LoadingScreen() {
 
           return (
             <View key={index} style={styles.loadingStep}>
-              <View style={[
-                styles.stepIconCircle,
-                isDone && styles.stepIconDone,
-                isActive && styles.stepIconActive,
-              ]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  isDone && styles.stepIconDone,
+                  isActive && styles.stepIconActive,
+                ]}
+              >
                 {isDone ? (
                   <Feather name="check" size={14} color="#fff" />
                 ) : isActive ? (
@@ -319,12 +202,14 @@ function LoadingScreen() {
                   <Feather name={step.icon} size={14} color={COLORS.border} />
                 )}
               </View>
-              <Text style={[
-                styles.loadingStepText,
-                isDone && styles.stepTextDone,
-                isActive && styles.stepTextActive,
-                isPending && styles.stepTextPending,
-              ]}>
+              <Text
+                style={[
+                  styles.loadingStepText,
+                  isDone && styles.stepTextDone,
+                  isActive && styles.stepTextActive,
+                  isPending && styles.stepTextPending,
+                ]}
+              >
                 {step.text}
               </Text>
             </View>
@@ -338,35 +223,7 @@ function LoadingScreen() {
   );
 }
 
-function MetricItem({ label, value, unit }: { label: string; value: string; unit: string }) {
-  return (
-    <View style={styles.metricItem}>
-      <Text style={styles.metricValue}>{value}</Text>
-      <Text style={styles.metricUnit}>{unit}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
-    </View>
-  );
-}
-
-function MacroBadge({ label, value, unit, color }: { label: string; value: number; unit: string; color: string }) {
-  return (
-    <View style={[styles.macroBadge, { backgroundColor: color + '15' }]}>
-      <Text style={[styles.macroBadgeValue, { color }]}>{value}{unit}</Text>
-      <Text style={[styles.macroBadgeLabel, { color }]}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  reportContent: {
-    padding: SPACING.screenPadding,
-    paddingBottom: SPACING.xxl,
-  },
-
   // Loading
   loadingContainer: {
     flex: 1,
@@ -487,149 +344,5 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.md,
-  },
-
-  // Summary
-  summaryCard: {
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  calorieCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.md,
-    borderWidth: 3,
-    borderColor: COLORS.primary,
-  },
-  calorieNumber: {
-    ...FONTS.headlineBold,
-    color: COLORS.primary,
-    fontSize: 28,
-  },
-  calorieLabel: {
-    ...FONTS.small,
-    color: COLORS.primaryDark,
-    marginTop: -2,
-  },
-  summaryTitle: {
-    ...FONTS.bodyMedium,
-    color: COLORS.text,
-    textAlign: 'center',
-    fontWeight: '600',
-    marginBottom: SPACING.sm,
-  },
-  summaryText: {
-    ...FONTS.caption,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-
-  // Calculated Metrics
-  metricsCard: {
-    marginBottom: SPACING.lg,
-    padding: SPACING.md,
-  },
-  metricsTitle: {
-    ...FONTS.bodyMedium,
-    color: COLORS.text,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    marginBottom: SPACING.md,
-  },
-  metricItem: {
-    alignItems: 'center',
-    width: '25%',
-    paddingVertical: SPACING.sm,
-  },
-  metricValue: {
-    ...FONTS.headlineMedium,
-    color: COLORS.primary,
-    fontSize: 20,
-  },
-  metricUnit: {
-    ...FONTS.small,
-    color: COLORS.textSecondary,
-    marginTop: -2,
-  },
-  metricLabel: {
-    ...FONTS.small,
-    color: COLORS.text,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  macroRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  macroBadge: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.full,
-    alignItems: 'center',
-  },
-  macroBadgeValue: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  macroBadgeLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-    marginTop: 1,
-  },
-  rateText: {
-    ...FONTS.small,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-
-  // Sections
-  section: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    ...FONTS.headlineMedium,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  suppRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.sm,
-  },
-  suppText: {
-    ...FONTS.body,
-    color: COLORS.text,
-    flex: 1,
-  },
-
-  // Disclaimer
-  disclaimer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.sm,
-    padding: SPACING.md,
-    backgroundColor: '#F1F5F9',
-    borderRadius: BORDER_RADIUS.md,
-    marginTop: SPACING.md,
-  },
-  disclaimerText: {
-    ...FONTS.small,
-    color: COLORS.textSecondary,
-    flex: 1,
-    lineHeight: 18,
   },
 });

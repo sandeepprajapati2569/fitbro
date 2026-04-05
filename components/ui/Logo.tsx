@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../../lib/constants';
+import Svg, { Defs, LinearGradient, Stop, Rect, Path, Circle } from 'react-native-svg';
+import { COLORS, FONTS } from '../../lib/constants';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -8,31 +8,51 @@ interface LogoProps {
 }
 
 const SIZES = {
-  small: { icon: 18, circle: 34, fontSize: 17, gap: 8 },
-  medium: { icon: 28, circle: 50, fontSize: 24, gap: 10 },
-  large: { icon: 40, circle: 76, fontSize: 34, gap: 12 },
+  small: { icon: 34, fontSize: 17, gap: 8 },
+  medium: { icon: 50, fontSize: 24, gap: 10 },
+  large: { icon: 76, fontSize: 34, gap: 12 },
 };
+
+function LogoIcon({ size }: { size: number }) {
+  const r = size * 0.22; // corner radius
+
+  return (
+    <View style={[styles.iconShadow, { width: size, height: size }]}>
+      <Svg width={size} height={size} viewBox="0 0 100 100">
+        <Defs>
+          <LinearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#14B8A6" />
+            <Stop offset="100%" stopColor="#0D7377" />
+          </LinearGradient>
+          <LinearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#5EEAD4" />
+            <Stop offset="100%" stopColor="#2DD4BF" />
+          </LinearGradient>
+        </Defs>
+
+        {/* Rounded square background */}
+        <Rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="url(#bgGrad)" />
+
+        {/* Stylized bolt / lightning — represents energy & fitness */}
+        <Path
+          d="M 56 16 L 34 50 L 48 50 L 42 84 L 68 46 L 53 46 Z"
+          fill="white"
+          opacity={0.95}
+        />
+
+        {/* Small accent dot — top right */}
+        <Circle cx="74" cy="24" r="6" fill="url(#accentGrad)" opacity={0.8} />
+      </Svg>
+    </View>
+  );
+}
 
 export function Logo({ size = 'medium', showText = true }: LogoProps) {
   const s = SIZES[size];
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.iconCircle,
-          { width: s.circle, height: s.circle, borderRadius: s.circle / 2 },
-        ]}
-      >
-        <View
-          style={[
-            styles.innerRing,
-            { width: s.circle - 6, height: s.circle - 6, borderRadius: (s.circle - 6) / 2 },
-          ]}
-        >
-          <Feather name="trending-up" size={s.icon * 0.6} color="#000" />
-        </View>
-      </View>
+      <LogoIcon size={s.icon} />
       {showText && (
         <View style={{ marginLeft: s.gap }}>
           <Text style={[styles.logoText, { fontSize: s.fontSize }]}>
@@ -50,21 +70,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  iconCircle: {
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 14,
-    elevation: 10,
-  },
-  innerRing: {
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  iconShadow: {
+    shadowColor: '#0D9488',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   logoText: {
     fontFamily: 'Urbanist_700Bold',

@@ -96,7 +96,6 @@ export default function HomeScreen() {
         dailyCalories={aiReport.dailyCalorieTarget}
         goalText={goalText}
         calc={calc}
-        onNewPlan={handleNewPlan}
       />
       <SegmentedControl activeSegment={activeSegment} onSegmentChange={setActiveSegment} />
       <View style={styles.content}>{renderContent()}</View>
